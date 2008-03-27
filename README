@@ -4,10 +4,16 @@ NAME
 
 SYNOPSIS
       [% USE web_service = WebService %]
+      [% form = { 'outserial' => 'xml' } %]
       [% stuff = web_service.webservice_call(url, form) %]
-
       # url is the url to hit
+
+      [% stuff = web_service.webservice_call('/path/to/api', form) %]
       # form is a hash ref that gets appended to the url
+      # url can be relative, where the domain gets set to $self->default_host
+
+      [% stuff = web_service.webservice_call('http://domain.com/path/to/api', form) %]
+
 
 DESCRIPTION
     Template::Plugin::WebService helps handle HTTP from a template.

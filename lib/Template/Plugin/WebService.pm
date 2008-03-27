@@ -6,13 +6,14 @@ use base qw(Template::Plugin);
 
 use vars qw($VERSION);
 
-$VERSION = '0.14';
+$VERSION = '0.16';
 
 use CGI::Ex;
 
 use Carp qw(confess);
-use WWW::Mechanize;
+use CGI::Cookie;
 use Storable qw(thaw);
+use WWW::Mechanize;
 
 sub new {
     my $class   = shift;
@@ -33,6 +34,24 @@ sub URLEncode {
     $$ref =~ tr/\ /+/;
 
     return $return ? $$ref : '';
+}
+
+sub get_outserial {
+    my $self = shift;
+    my $url = shift;
+    my $form = shift;
+
+    my $outserial_key = $self->outserial_key;
+    
+    my $outserial = 'json';
+
+    if($form->{$outserial_key}) {
+        $outserial = $form->{$outserial_key};
+    } elsif($url =~ /\b$outserial_key=(\w+)/) {
+        $outserial = $1;
+    }
+
+    return $outserial;
 }
 
 sub make_form {
@@ -123,18 +142,17 @@ sub webservice_call {
 
     my $obj;
 
-    if ($form && $form->{$self->outserial_key}) {
-        my $outserial = $form->{$self->outserial_key};
-        if($outserial eq 'storable') {
-            require Storable;
-            $obj = Storable::thaw($content);
-        } elsif($outserial eq 'xml') {
-            require XML::Simple;
-            $obj = XMLin($content);
-        } elsif($outserial eq 'yaml') {
-            require YAML;
-            $obj = YAML::Load($content);
-        }
+    my $outserial = $self->get_outserial($url, $form);
+
+    if($outserial eq 'storable') {
+        require Storable;
+        $obj = Storable::thaw($content);
+    } elsif($outserial eq 'xml') {
+        require XML::Simple;
+        $obj = XML::Simple::XMLin($content);
+    } elsif($outserial eq 'yaml') {
+        require YAML;
+        $obj = YAML::Load($content);
     } else {
         require JSON;
         $obj = JSON::from_json($content);
@@ -155,10 +173,15 @@ from Template and Template::Alloy
 =head1 SYNOPSIS
 
   [% USE web_service = WebService %]
+  [% form = { 'outserial' => 'xml' } %]
   [% stuff = web_service.webservice_call(url, form) %]
-
   # url is the url to hit
+
+  [% stuff = web_service.webservice_call('/path/to/api', form) %]
   # form is a hash ref that gets appended to the url
+  # url can be relative, where the domain defaults to $self->default_host (127.0.0.1)
+
+  [% stuff = web_service.webservice_call('http://domain.com/path/to/api', form) %]
 
 =head1 DESCRIPTION
 
@@ -169,6 +192,7 @@ Template::Plugin::WebService helps handle HTTP from a template.
  - handles web requests from your template
  - passes along a passed in form
  - passes along any cookies
+ - specify serialization via form or just in the url's query_string
  - handles many serializations (JSON, Storable, XML::Simple, YAML)
  - defaults to JSON
 

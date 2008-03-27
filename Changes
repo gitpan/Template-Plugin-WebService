@@ -6,3 +6,7 @@ Revision history for Perl extension Template::Plugin::WebService.
 
 0.14  Thu Mar 27 00:21:33 2008
     - how about that Is?
+
+0.16  Thu Mar 27 00:50:33 2008
+    - need XML::Simple::XMLin
+    - allowing for outserial in the qs
