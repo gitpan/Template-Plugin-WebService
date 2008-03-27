@@ -1,13 +1,12 @@
 package Template::Plugin::WebService;
 
 use strict;
-use Is;
 
 use base qw(Template::Plugin);
 
 use vars qw($VERSION);
 
-$VERSION = '0.12';
+$VERSION = '0.14';
 
 use CGI::Ex;
 
