@@ -1,0 +1,5 @@
+Revision history for Perl extension Template::Plugin::WebService.
+
+0.12  Wed Mar 26 22:54:33 2008
+	- original version; created by h2xs 1.23 with options
+		-e -n Template::Plugin::WebService
